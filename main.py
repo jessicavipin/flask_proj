@@ -31,7 +31,7 @@ class TicTacToe(QWidget):
         clear.clicked.connect(restart)
 
         self.move(300, 150)
-        self.setWindowTitle('PyQt window')  
+        self.setWindowTitle('Tic Tac Toe')  
         self.show()
 
     #display the player name on the button

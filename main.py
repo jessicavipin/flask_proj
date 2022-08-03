@@ -78,16 +78,53 @@ class TicTacToe(QWidget):
             self.button[0].setText("~~~   Nobody Wins   ~~~ ")
         else:
             self.button[0].setText(winner +" wins!!!!")
-    
-        
-    
+      
 #clear button 
 def restart():
         QtCore.QCoreApplication.quit()
         status = QtCore.QProcess.startDetached(sys.executable, sys.argv)
         print(status)
 
+
+
+class Login(QWidget):
+
+    switch_window = QtCore.pyqtSignal()
+
+    def __init__(self):
+        QWidget.__init__(self)
+        self.setWindowTitle('Login')
+
+        layout = QGridLayout()
+
+        self.button = QPushButton('Login')
+        self.button.clicked.connect(self.login)
+
+        layout.addWidget(self.button)
+
+        self.setLayout(layout)
+
+    def login(self):
+        self.switch_window.emit()
+
+class Controller:
+
+    def __init__(self):
+        pass
+
+    def show_login(self):
+        self.login = Login()
+        self.login.switch_window.connect(self.show_tictactoe)
+        self.login.show()
+
+
+    def show_tictactoe(self):
+        self.tictactoe = TicTacToe()
+        self.login.close()
+        self.tictactoe.show()
+
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    ex = TicTacToe()
+    controller = Controller()
+    controller.show_login()
     sys.exit(app.exec_())  

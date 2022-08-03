@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import (QApplication, QWidget,
 QPushButton, QGridLayout, QLabel)
 from PyQt5 import QtCore
 
-class Example(QWidget):
+class TicTacToe(QWidget):
 
     def __init__(self):
         super().__init__()
@@ -15,10 +15,6 @@ class Example(QWidget):
         self.play="X"
         self.count=0
         widget = QWidget()
-        text= Label(widget)
-        text.setText("Checking")
-        grid.addLayout(text)
-
         names = [" "]*9
 
         positions = [(i, j) for i in range(3) for j in range(3)]
@@ -28,8 +24,6 @@ class Example(QWidget):
             k=k+1
             button = QPushButton(name,self)
             self.button.append(button)
-            
-
             button.clicked.connect(lambda _, kay=k: self.on_click(kay))
             grid.addWidget(button, *position)
         
@@ -39,9 +33,6 @@ class Example(QWidget):
         self.move(300, 150)
         self.setWindowTitle('PyQt window')  
         self.show()
-
-    # def create_on_click_fn(pos):
-    #     return lambda x: _onclick(x, pos)
 
     def on_click(self,k):
         print(k)
@@ -53,15 +44,21 @@ class Example(QWidget):
             else:
                 self.button[k].setText("X")
                 self.play="X"
+        self.check(k)
+    
+    def check(self,k):
+        #checking the row
         l=(k//3)*3
         if (self.button[l].text()==self.button[l+1].text()) and (self.button[l].text()==self.button[l+2].text()):
             self.end(self.play)
             print(1)
             return
+        #checking the column
         if (self.button[(k+3)%9].text()==self.button[k].text()) and (self.button[k].text()==self.button[(k+6)%9].text()):
             self.end(self.play)
             print(2)
             return
+        #checking the diagonals
         if k%2==0 and self.button[4].text()!=" ":
             if (self.button[2].text()==self.button[4].text()) and (self.button[2].text()==self.button[6].text()):
                 self.end(self.play)
@@ -71,17 +68,15 @@ class Example(QWidget):
                 self.end(self.play)
                 print(4)
                 return
+        #checking if its a draw
         if self.count==9:
-            self.end("Lost")
+            self.end("Draw")
         return
 
     def end(self,winner):
-        
-
-
         for i in range(1,9):
             self.button[i].hide()
-        if winner=="Lost":
+        if winner=="Draw":
             self.button[0].setText("~~~   Nobody Wins   ~~~ ")
         else:
             self.button[0].setText(winner +" wins!!!!")
@@ -96,21 +91,9 @@ def restart():
         status = QtCore.QProcess.startDetached(sys.executable, sys.argv)
         print(status)
 
-    
-
-        
-
-    # def _onclick(button, var):
-    #     button.hide()
-    #     return var
-
-
-
-    
-
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    ex = Example()
+    ex = TicTacToe()
     button = QPushButton("Restart")
     button.clicked.connect(restart)
 

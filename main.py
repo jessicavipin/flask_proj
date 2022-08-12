@@ -2,7 +2,7 @@ import os
 import sys
 from tkinter import Label
 from PyQt5.QtWidgets import (QApplication, QWidget,
-QPushButton, QGridLayout, QLabel)
+QPushButton, QGridLayout, QLabel, QLineEdit,QMessageBox)
 from PyQt5 import QtCore
 
 class TicTacToe(QWidget):
@@ -85,24 +85,118 @@ def restart():
         status = QtCore.QProcess.startDetached(sys.executable, sys.argv)
         print(status)
 
+class Create_Account(QWidget):
+    switch_window = QtCore.pyqtSignal()
+    
+
+    def __init__(self,i):
+        QWidget.__init__(self)
+        self.setWindowTitle('Create Account '+str(i))
+        self.resize(500,120)
+
+        layout = QGridLayout()
+        
+        label_name= QLabel('<font size="4"> Username </font>')
+        self.lineEdit_username = QLineEdit()
+        self.lineEdit_username.setPlaceholderText('Please enter your username')
+        layout.addWidget(label_name, 0, 0)
+        layout.addWidget(self.lineEdit_username, 0, 1)
+		
+        label_password = QLabel('<font size="4"> Password </font>')
+        self.lineEdit_password= QLineEdit()
+        self.lineEdit_password.setPlaceholderText('Please enter your password')
+        layout.addWidget(label_password, 1, 0)
+        layout.addWidget(self.lineEdit_password, 1, 1)
+
+        button_login = QPushButton('Create Account')
+        button_login.clicked.connect(self.check_password)
+        layout.addWidget(button_login, 2, 0, 1, 2)
+        layout.setRowMinimumHeight (2,75)
+
+        self.setLayout(layout)
+    
+    def check_password(self):
+        msg= QMessageBox()
+        print(self.lineEdit_password,self.lineEdit_username)
+        name = self.lineEdit_username.text()
+        password = self.lineEdit_password.text()
+        file1 = open("credentials.txt", "r")
+        flag = 0
+        index = 0
+        for line in file1:  
+            if "("+name+" ," in line:
+                flag = 1
+                break 
+        if flag == 1: 
+            msg.setText('Username Already exists')
+            msg.exec_()
+        else: 
+            self.switch_window.emit()
+            msg.setText('Success')
+            msg.exec() 
+            file1.close() 
+        
+
+    def login(self):
+        self.switch_window.emit()
+
 
 
 class Login(QWidget):
 
     switch_window = QtCore.pyqtSignal()
+    
 
-    def __init__(self):
+    def __init__(self,i):
         QWidget.__init__(self)
-        self.setWindowTitle('Login')
+        self.setWindowTitle('Login User '+str(i))
+        self.resize(500,120)
 
         layout = QGridLayout()
+        
+        label_name= QLabel('<font size="4"> Username </font>')
+        self.lineEdit_username = QLineEdit()
+        self.lineEdit_username.setPlaceholderText('Please enter your username')
+        layout.addWidget(label_name, 0, 0)
+        layout.addWidget(self.lineEdit_username, 0, 1)
+		
+        label_password = QLabel('<font size="4"> Password </font>')
+        self.lineEdit_password= QLineEdit()
+        self.lineEdit_password.setPlaceholderText('Please enter your password')
+        layout.addWidget(label_password, 1, 0)
+        layout.addWidget(self.lineEdit_password, 1, 1)
 
-        self.button = QPushButton('Login')
-        self.button.clicked.connect(self.login)
-
-        layout.addWidget(self.button)
+        button_login = QPushButton('Login')
+        button_login.clicked.connect(self.check_password)
+        layout.addWidget(button_login, 2, 0, 1, 2)
+        layout.setRowMinimumHeight (2,75)
 
         self.setLayout(layout)
+    
+    def check_password(self):
+        msg= QMessageBox()
+        print(self.lineEdit_password,self.lineEdit_username)
+        name = self.lineEdit_username.text()
+        password = self.lineEdit_password.text()
+        file1 = open("credentials.txt", "r+")
+        flag = 0
+        index = 0
+        for line in file1:  
+            if "("+name+" ," in line:
+                flag = 1
+                break 
+        if flag == 0: 
+            msg.setText('Incorrect Username')
+            msg.exec_()
+        elif "("+name+" , "+password+")" in line:  
+            self.switch_window.emit()
+            msg.setText('Success')
+            msg.exec() 
+            file1.close() 
+        else:
+            msg.setText('Incorrect Password')
+            msg.exec_()
+        
 
     def login(self):
         self.switch_window.emit()
@@ -113,14 +207,19 @@ class Controller:
         pass
 
     def show_login(self):
-        self.login = Login()
-        self.login.switch_window.connect(self.show_tictactoe)
+        self.login = Login(1)
+        self.login.switch_window.connect(self.show_login_2)
         self.login.show()
-
+    
+    def show_login_2(self):
+        self.login_2 = Login(2)
+        self.login_2.switch_window.connect(self.show_tictactoe)
+        self.login_2.show()
+        self.login.close()
 
     def show_tictactoe(self):
         self.tictactoe = TicTacToe()
-        self.login.close()
+        self.login_2.close()
         self.tictactoe.show()
 
 if __name__ == '__main__':

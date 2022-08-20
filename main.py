@@ -88,6 +88,7 @@ def restart():
 class Create_Account(QWidget):
     switch_window = QtCore.pyqtSignal()
     
+    
 
     def __init__(self,i):
         QWidget.__init__(self)
@@ -108,14 +109,14 @@ class Create_Account(QWidget):
         layout.addWidget(label_password, 1, 0)
         layout.addWidget(self.lineEdit_password, 1, 1)
 
-        button_login = QPushButton('Create Account')
-        button_login.clicked.connect(self.check_password)
-        layout.addWidget(button_login, 2, 0, 1, 2)
+        button_create = QPushButton('Create Account')
+        button_create.clicked.connect(self.add_account)
+        layout.addWidget(button_create, 2, 0, 1, 2)
         layout.setRowMinimumHeight (2,75)
 
         self.setLayout(layout)
     
-    def check_password(self):
+    def add_account(self):
         msg= QMessageBox()
         print(self.lineEdit_password,self.lineEdit_username)
         name = self.lineEdit_username.text()
@@ -127,24 +128,24 @@ class Create_Account(QWidget):
             if "("+name+" ," in line:
                 flag = 1
                 break 
+        file1.close()
         if flag == 1: 
             msg.setText('Username Already exists')
             msg.exec_()
         else: 
+            file1 = open("credentials.txt", "a")
+            file1.write("\n("+name+" , "+password+")" )
+            file1.close()
             self.switch_window.emit()
             msg.setText('Success')
             msg.exec() 
-            file1.close() 
+             
         
-
-    def login(self):
-        self.switch_window.emit()
-
-
 
 class Login(QWidget):
 
     switch_window = QtCore.pyqtSignal()
+    switch_create = QtCore.pyqtSignal()
     
 
     def __init__(self,i):
@@ -171,14 +172,21 @@ class Login(QWidget):
         layout.addWidget(button_login, 2, 0, 1, 2)
         layout.setRowMinimumHeight (2,75)
 
+        button_create = QPushButton('Create Account')
+        button_create.clicked.connect(self.create)
+        layout.addWidget(button_create, 3, 0)
+
         self.setLayout(layout)
+    
+    def create(self):
+        self.switch_create.emit()
     
     def check_password(self):
         msg= QMessageBox()
         print(self.lineEdit_password,self.lineEdit_username)
         name = self.lineEdit_username.text()
         password = self.lineEdit_password.text()
-        file1 = open("credentials.txt", "r+")
+        file1 = open("credentials.txt", "r")
         flag = 0
         index = 0
         for line in file1:  
@@ -198,23 +206,37 @@ class Login(QWidget):
             msg.exec_()
         
 
-    def login(self):
-        self.switch_window.emit()
+
 
 class Controller:
 
     def __init__(self):
-        pass
+        self.login = Login(1)
+        self.create = Create_Account(1)
+        self.login_2 = Login(2)
+        
 
     def show_login(self):
         self.login = Login(1)
         self.login.switch_window.connect(self.show_login_2)
+        self.login.switch_create.connect(self.show_create_account)
         self.login.show()
+        self.create.close()
+
+    def show_create_account(self):
+        self.create = Create_Account(1)
+        self.create.switch_window.connect(self.login.show)
+        self.create.show()
+        self.login.close()
+        self.login_2.close()
+
     
     def show_login_2(self):
         self.login_2 = Login(2)
         self.login_2.switch_window.connect(self.show_tictactoe)
+        self.login_2.switch_create.connect(self.show_create_account)
         self.login_2.show()
+        self.create.close()
         self.login.close()
 
     def show_tictactoe(self):
